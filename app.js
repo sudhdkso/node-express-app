@@ -15,15 +15,14 @@ app.set('view engine', 'ejs');
 app.set('views', './views');
 
 // DB연결 모듈
-const connect = require('./schemas');
+const connect = require('./src/models');
 
 // 몽고 디비 연결
 connect();
 
-const indexRouter = require('./routes');
-const usersRouter = require('./routes/users');
+const routes = require('./src/routes');
 
-app.use('/users', usersRouter);
+app.use('/users', routes.userRoutes);
 
 app.listen(port, () => {
     console.log('Server listening on port: ',port)
