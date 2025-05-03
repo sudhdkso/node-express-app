@@ -1,0 +1,57 @@
+<div class="container">
+  <h1>회원가입</h1>
+  <form id="signupForm" action="/users" method="POST">
+    <div class="input-group">
+      <label for="email">이메일:</label>
+      <input type="email" id="email" name="email" required autocomplete="username" placeholder="example@email.com" />
+    </div>
+    <div class="input-group">
+      <label for="password">비밀번호:</label>
+      <input type="password" id="password" name="password" required autocomplete="new-password" />
+    </div>
+    <div class="input-group">
+      <label for="name">이름:</label>
+      <input type="text" id="name" name="name" required />
+    </div>
+    <div class="input-group">
+      <label for="age">나이:</label>
+      <select id="age" name="age" required>
+        <% for (let i = 10; i <= 100; i++) { %>
+          <option value="<%= i %>"><%= i %></option>
+        <% } %>
+      </select>
+    </div>
+    <div class="input-group">
+      <label>전화번호:</label>
+      <input
+        type="text"
+        id="phone"
+        name="phone"
+        maxlength="13"
+        pattern="\d{3}-\d{4}-\d{4}"
+        placeholder="하이픈 없이 숫자만 입력해주세요"
+        required
+        autocomplete="off"
+      />
+    </div>
+    <button type="submit">가입하기</button>
+  </form>
+</div>
+
+<script>
+  document.getElementById('phone').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, ''); // 숫자만 남김
+    if (value.length > 11) value = value.slice(0, 11); // 11자리까지만
+  
+    let formatted = '';
+    if (value.length > 7) {
+      formatted = value.slice(0,3) + '-' + value.slice(3,7) + '-' + value.slice(7,11);
+    } else if (value.length > 3) {
+      formatted = value.slice(0,3) + '-' + value.slice(3,7);
+    } else {
+      formatted = value;
+    }
+    e.target.value = formatted;
+  })
+</script>
+  
