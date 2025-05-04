@@ -21,7 +21,11 @@ jobs:
       - name: Get commit messages and issues
         id: extract
         run: |
-          COMMITS=$(git log --pretty=format:"%s" main..${{ steps.branch.outputs.BRANCH_NAME }} | sed 's/^[^:]*:[[:space:]]*//' | sed 's/^/- /')
+          # 원격 브랜치 정보 최신화
+           git fetch origin
+
+          # 원격 브랜치 기준으로 로그 조회
+          COMMITS=$(git log --pretty=format:"%s" origin/main..origin/feat/user-signup-recovery | sed 's/^[^:]*:[[:space:]]*//' | sed 's/^/- /')
           echo "COMMIT_BODIES<<EOF" >> $GITHUB_ENV
           echo "$COMMITS" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -69,7 +73,6 @@ jobs:
       - name: Update PR body
         if: env.EXISTING_PR != ''
         run: |
-          # 이전 내용은 무시하고 항상 최신 전체 커밋 내역으로 업데이트
           BODY="${{ env.HEADER }}
 
           ${{ env.COMMIT_BODIES }}
