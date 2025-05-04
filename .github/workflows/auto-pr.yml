@@ -36,7 +36,7 @@ jobs:
       - name: Get existing PR info
         id: get-pr
         run: |
-          gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+          # GitHub CLI 인증 없이 GH_TOKEN을 이용해서 PR 목록을 가져옵니다
           PR_JSON=$(gh pr list --head "${{ steps.branch.outputs.BRANCH_NAME }}" --json number -q '.[0].number')
 
           if [ -z "$PR_JSON" ]; then
