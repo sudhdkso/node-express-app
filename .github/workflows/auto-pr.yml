@@ -83,10 +83,13 @@ jobs:
 
       - name: Create new PR if none exists
         if: env.EXISTING_PR == ''
-        uses: peter-evans/create-pull-request@v5
+        uses: repo-sync/pull-request-action@v2
         with:
+          source_branch: '${{ steps.branch.outputs.BRANCH_NAME }}'
+          destination_branch: 'main'
           token: ${{ secrets.GITHUB_TOKEN }}
           title: '${{ steps.branch.outputs.BRANCH_NAME }}'
+
           body: |
             ## 🔗 연관 이슈
             ${{ env.RELATED_ISSUES }}
@@ -99,7 +102,5 @@ jobs:
 
             ---
             자동 생성된 PR입니다.
-          branch: auto-pr/${{ steps.branch.outputs.BRANCH_NAME }}
-          base: main
-          delete-branch: false
+          pr_allow_empty: true
           draft: false
