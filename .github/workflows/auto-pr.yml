@@ -21,7 +21,7 @@ jobs:
       - name: Get commit messages and issues
         id: extract
         run: |
-          COMMITS=$(git log -5 --pretty=format:"%s" ${{ github.event.before }}..HEAD | sed 's/^[^:]*:[[:space:]]*//' | sed 's/^/- /')
+          COMMITS=$(git log --pretty=format:"%s" main..${{ steps.branch.outputs.BRANCH_NAME }} | sed 's/^[^:]*:[[:space:]]*//' | sed 's/^/- /')
           echo "COMMIT_BODIES<<EOF" >> $GITHUB_ENV
           echo "$COMMITS" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -52,6 +52,7 @@ jobs:
           BODY=$(gh pr view ${{ env.EXISTING_PR }} --json body -q .body)
           echo "$BODY" > pr_body.txt
 
+          # PR 본문에서 작업 내용과 헤더 부분 파싱
           OLD_BODY=$(awk '/## ✅ 작업 내용/{flag=1; next} /---/{flag=0} flag' pr_body.txt || true)
           HEADER=$(awk '/^## 🔗 연관 이슈/,/^## ✅ 작업 내용/' pr_body.txt || true)
 
@@ -68,9 +69,9 @@ jobs:
       - name: Update PR body
         if: env.EXISTING_PR != ''
         run: |
+          # 이전 내용은 무시하고 항상 최신 전체 커밋 내역으로 업데이트
           BODY="${{ env.HEADER }}
 
-          ${{ env.OLD_BODY }}
           ${{ env.COMMIT_BODIES }}
 
           ---
@@ -87,10 +88,8 @@ jobs:
         with:
           source_branch: '${{ steps.branch.outputs.BRANCH_NAME }}'
           destination_branch: 'main'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: '${{ steps.branch.outputs.BRANCH_NAME }}'
-
-          body: |
+          pr_title: '${{ steps.branch.outputs.BRANCH_NAME }}'
+          pr_body: |
             ## 🔗 연관 이슈
             ${{ env.RELATED_ISSUES }}
 
@@ -102,5 +101,5 @@ jobs:
 
             ---
             자동 생성된 PR입니다.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           pr_allow_empty: true
-          draft: false
