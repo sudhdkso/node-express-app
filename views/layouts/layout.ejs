@@ -1,48 +1,54 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <title><%= title %></title>
-  <link rel="stylesheet" href="/styles.css" />
-</head>
-<body>
-  <!-- 여기서 각 페이지의 내용을 포함 -->
-  <%- body %>
+    <head>
+        <meta charset="UTF-8" />
+        <title><%= title %></title>
+        <link rel="stylesheet" href="/styles.css" />
+    </head>
+    <body>
+        <!-- 여기서 각 페이지의 내용을 포함 -->
+        <%- body %>
 
-  <!-- 공통 오류 모달 -->
-  <div id="errorModal" class="modal">
-    <div class="modal-content">
-      <span class="close" id="closeModal">&times;</span>
-      <h2>오류 발생!</h2>
-      <p id="errorMessage">문제가 발생했습니다. 다시 시도해주세요.</p>
-      <button id="confirmBtn">확인</button>
-      <button id="cancelBtn">취소</button>
-    </div>
-  </div>
+        <!-- 공통 오류 모달 -->
+        <div id="errorModal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="closeModal">&times;</span>
+                <h2>오류 발생!</h2>
+                <p id="errorMessage">문제가 발생했습니다. 다시 시도해주세요.</p>
+                <button id="confirmBtn">확인</button>
+                <button id="cancelBtn">취소</button>
+            </div>
+        </div>
 
-  <script>
-    // 모달 관련 스크립트
-    function showModal(message) {
-      const modal = document.getElementById('errorModal');
-      const errorMessage = document.getElementById('errorMessage');
-      errorMessage.textContent = message;  // 오류 메시지를 변경
-      modal.style.display = "block";
-    }
+        <script>
+            // 모달 관련 스크립트
+            function showModal(message) {
+                const modal = document.getElementById('errorModal');
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.textContent = message; // 오류 메시지를 변경
+                modal.style.display = 'block';
+            }
 
-    document.getElementById('closeModal').addEventListener('click', function() {
-      const modal = document.getElementById('errorModal');
-      modal.style.display = "none";
-    });
+            document
+                .getElementById('closeModal')
+                .addEventListener('click', function () {
+                    const modal = document.getElementById('errorModal');
+                    modal.style.display = 'none';
+                });
 
-    document.getElementById('confirmBtn').addEventListener('click', function() {
-      alert("확인 버튼 클릭!");
-      // 실제 폼 제출 등 동작을 여기에 구현
-    });
+            document
+                .getElementById('confirmBtn')
+                .addEventListener('click', function () {
+                    alert('확인 버튼 클릭!');
+                    // 실제 폼 제출 등 동작을 여기에 구현
+                });
 
-    document.getElementById('cancelBtn').addEventListener('click', function() {
-      const modal = document.getElementById('errorModal');
-      modal.style.display = "none";
-    });
-  </script>
-</body>
+            document
+                .getElementById('cancelBtn')
+                .addEventListener('click', function () {
+                    const modal = document.getElementById('errorModal');
+                    modal.style.display = 'none';
+                });
+        </script>
+    </body>
 </html>
