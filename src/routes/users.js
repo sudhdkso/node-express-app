@@ -10,6 +10,12 @@ router.get('/signup', (req, res) => {
     });
 });
 
+router.get('/login', (req, res) => {
+    res.render('login', {
+        title: '로그인',
+    });
+});
+
 router.post('/login', userController.login);
 
 router.route('/').get(userController.getAllUsers).post(userController.signup);
