@@ -11,51 +11,95 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Set up Git
-        run: git fetch --prune --unshallow
+        with:
+          fetch-depth: 0
 
       - name: Get branch name
         id: branch
         run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
-      - name: Get commit messages and extract issues
+      - name: Get commit messages and issues
         id: extract
         run: |
-          COMMITS=$(git log -5 --pretty=format:"- %s" ${{ github.event.before }}..HEAD)
-          echo "COMMITS<<EOF" >> $GITHUB_ENV
+          COMMITS=$(git log -5 --pretty=format:"%s" ${{ github.event.before }}..HEAD | sed 's/^[^:]*:[[:space:]]*//' | sed 's/^/- /')
+          echo "COMMIT_BODIES<<EOF" >> $GITHUB_ENV
           echo "$COMMITS" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-          # Extract related issues from commit messages (e.g., #123, #456)
           ISSUES=$(echo "$COMMITS" | grep -oE "#[0-9]+" | sort -u | tr '\n' ',' | sed 's/,$//')
           if [ -z "$ISSUES" ]; then
             ISSUES="X"
           fi
           echo "RELATED_ISSUES=$ISSUES" >> $GITHUB_ENV
 
-          # Extract commit message content after ":"
-          COMMIT_BODIES=$(echo "$COMMITS" | sed 's/^[^:]*: //')
-          echo "COMMIT_BODIES<<EOF" >> $GITHUB_ENV
-          echo "$COMMIT_BODIES" >> $GITHUB_ENV
+      - name: Get existing PR info
+        id: get-pr
+        run: |
+          PR_JSON=$(gh pr list --head "${{ steps.branch.outputs.BRANCH_NAME }}" --json number -q '.[0].number')
+
+          if [ -z "$PR_JSON" ]; then
+            echo "EXISTING_PR=" >> $GITHUB_ENV
+          else
+            echo "EXISTING_PR=$PR_JSON" >> $GITHUB_ENV
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get existing PR body
+        if: env.EXISTING_PR != ''
+        id: pr-body
+        run: |
+          BODY=$(gh pr view ${{ env.EXISTING_PR }} --json body -q .body)
+          echo "$BODY" > pr_body.txt
+
+          OLD_BODY=$(awk '/## ✅ 작업 내용/{flag=1; next} /---/{flag=0} flag' pr_body.txt || true)
+          HEADER=$(awk '/^## 🔗 연관 이슈/,/^## ✅ 작업 내용/' pr_body.txt || true)
+
+          echo "OLD_BODY<<EOF" >> $GITHUB_ENV
+          echo "$OLD_BODY" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: Create PR
-        uses: repo-sync/pull-request@v2
+          echo "HEADER<<EOF" >> $GITHUB_ENV
+          echo "$HEADER" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update PR body
+        if: env.EXISTING_PR != ''
+        run: |
+          BODY="${{ env.HEADER }}
+
+          ${{ env.OLD_BODY }}
+          ${{ env.COMMIT_BODIES }}
+
+          ---
+          자동 생성된 PR입니다."
+
+          echo -e "$BODY" > new_body.md
+          gh pr edit ${{ env.EXISTING_PR }} --body-file new_body.md
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create new PR if none exists
+        if: env.EXISTING_PR == ''
+        uses: peter-evans/create-pull-request@v5
         with:
-          source_branch: ${{ steps.branch.outputs.BRANCH_NAME }}
-          destination_branch: main
-          pr_title: "steps.branch.outputs.BRANCH_NAME"
-          pr_body: |
-            ## 🔗 연관 이슈
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: '${{ steps.branch.outputs.BRANCH_NAME }}'
+          body: |
+            ## 🔗 연s관 이슈
             ${{ env.RELATED_ISSUES }}
-            
+
             ## 🔀 브랜치 병합
             ${{ steps.branch.outputs.BRANCH_NAME }} → main
-            
+
             ## ✅ 작업 내용
             ${{ env.COMMIT_BODIES }}
 
             ---
             자동 생성된 PR입니다.
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.branch.outputs.BRANCH_NAME }}
+          base: main
+          delete-branch: false
+          draft: false
