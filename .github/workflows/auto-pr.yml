@@ -35,13 +35,12 @@ jobs:
           fi
           echo "RELATED_ISSUES=$ISSUES" >> $GITHUB_ENV
 
-      - name: Create PR
-        uses: repo-sync/pull-request@v2
+      - name: Create or Update PR
+        uses: peter-evans/create-pull-request@v5
         with:
-          source_branch: ${{ steps.branch.outputs.BRANCH_NAME }}
-          destination_branch: main
-          pr_title: '${{ steps.branch.outputs.BRANCH_NAME }}'
-          pr_body: |
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: '${{ steps.branch.outputs.BRANCH_NAME }}'
+          body: |
             ## 🔗 연관 이슈
             ${{ env.RELATED_ISSUES }}
 
@@ -53,4 +52,8 @@ jobs:
 
             ---
             자동 생성된 PR입니다.
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ steps.branch.outputs.BRANCH_NAME }}
+          base: main
+          delete-branch: false
+          draft: false
+          update-existing: true
