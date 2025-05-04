@@ -1,7 +1,8 @@
-class UserDTO {
-    constructor(email, name, password, phoneNumber, age) {
+class CreateUserDTO {
+    constructor(email, name, salt, password, phoneNumber, age) {
         this.email = email;
         this.name = name;
+        this.salt = salt;
         this.password = password;
         this.phoneNumber = phoneNumber;
         this.age = age;
@@ -29,4 +30,4 @@ class UserDTO {
     }
 }
 
-module.exports = UserDTO;
+module.exports = CreateUserDTO;

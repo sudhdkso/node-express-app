@@ -10,11 +10,13 @@ exports.createUser = async (userData) => {
             console.log('Validation errors: ', errors);
             throw new Error('Validation failed');
         }
+        const password = hashPassword(userData.password);
 
         const userDto = new UserDTO(
             userData.email,
             userData.name,
-            hashPassword(userData.password),
+            password.salt,
+            password.hashed,
             userData.phoneNumber,
             userData.age
         );
@@ -26,6 +28,36 @@ exports.createUser = async (userData) => {
     }
 };
 
-function hashPassword(password) {
-    return crypto.createHash('sha256').update(password).digest('hex');
+exports.login = async (userData) => {
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new Error('사용자를 찾을 수 없습니다.');
+        }
+        const isMatch = verifyPassword(
+            userData.password,
+            user.password,
+            user.salt
+        );
+        if (!isMatch) {
+            throw new Error('비밀번호가 일치하지 않습니다.');
+        }
+        return user;
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
+    const hashed = crypto
+        .pbkdf2Sync(password, salt, 10000, 64, 'sha512')
+        .toString('hex');
+    return { salt, hashed };
+}
+
+function verifyPassword(inputPassword, storedHash, storedSalt) {
+    const inputHash = crypto
+        .pbkdf2Sync(inputPassword, storedSalt, 10000, 64, 'sha512')
+        .toString('hex');
+    return inputHash === storedHash;
 }

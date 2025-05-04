@@ -28,6 +28,7 @@ userSchema.add({
         require: false,
         unique: true,
     },
+    salt: String,
 });
 
 module.exports = mongoose.model('User', userSchema);
