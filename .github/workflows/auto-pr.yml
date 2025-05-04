@@ -88,7 +88,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: '${{ steps.branch.outputs.BRANCH_NAME }}'
           body: |
-            ## 🔗 연s관 이슈
+            ## 🔗 연관 이슈
             ${{ env.RELATED_ISSUES }}
 
             ## 🔀 브랜치 병합
