@@ -10,6 +10,8 @@ router.get('/signup', (req, res) => {
     });
 });
 
+router.post('/login', userController.login);
+
 router.route('/').get(userController.getAllUsers).post(userController.signup);
 
 router.get('/:id', userController.getUser);

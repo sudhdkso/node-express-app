@@ -12,6 +12,17 @@ exports.signup = async (req, res) => {
     }
 };
 
+exports.login = async (req, res) => {
+    try {
+        const user = await userService.login(req.body);
+        console.log(user);
+        res.status(200).json(user);
+    } catch (err) {
+        res.status(500).json({ error: 'Error login user' });
+        console.error(err);
+    }
+};
+
 exports.getUser = async (res, req) => {
     try {
         const user = await User.find({ id: req.params.id });
