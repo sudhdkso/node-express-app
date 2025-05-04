@@ -11,9 +11,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Set up Git
-        run: git fetch --prune --unshallow
+        with:
+          fetch-depth: 0
 
       - name: Get branch name
         id: branch
@@ -22,7 +21,7 @@ jobs:
       - name: Get commit messages and issues
         id: extract
         run: |
-          COMMITS=$(git log -5 --pretty=format:"%s" ${{ github.event.before }}..HEAD | sed 's/^[^:]*: //g' | sed 's/^/- /')
+          COMMITS=$(git log -5 --pretty=format:"%s" ${{ github.event.before }}..HEAD | sed 's/^[^:]*:[[:space:]]*//' | sed 's/^/- /')
           echo "COMMIT_BODIES<<EOF" >> $GITHUB_ENV
           echo "$COMMITS" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -36,7 +35,6 @@ jobs:
       - name: Get existing PR info
         id: get-pr
         run: |
-          # GitHub CLI 인증 없이 GH_TOKEN을 이용해서 PR 목록을 가져옵니다
           PR_JSON=$(gh pr list --head "${{ steps.branch.outputs.BRANCH_NAME }}" --json number -q '.[0].number')
 
           if [ -z "$PR_JSON" ]; then
@@ -90,7 +88,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           title: '${{ steps.branch.outputs.BRANCH_NAME }}'
           body: |
-            ## 🔗 연관 이슈
+            ## 🔗 연s관 이슈
             ${{ env.RELATED_ISSUES }}
 
             ## 🔀 브랜치 병합
@@ -105,3 +103,4 @@ jobs:
           base: main
           delete-branch: false
           draft: false
+          allow_no_diff: true
