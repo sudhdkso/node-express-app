@@ -1,14 +1,12 @@
-const express = require('express')
-const mongoose = require("mongoose")
-const cors = require('cors')
-const app = express()
-const port = 3000
-const router = express.Router();
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const port = 3000;
 
-app.use(cors())
+app.use(cors());
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'))
+app.use(express.static('public'));
 
 //ejs
 app.set('view engine', 'ejs');
@@ -25,5 +23,5 @@ const routes = require('./src/routes');
 app.use('/users', routes.userRoutes);
 
 app.listen(port, () => {
-    console.log('Server listening on port: ',port)
-})
+    console.log('Server listening on port: ', port);
+});

@@ -1,33 +1,33 @@
-const mongoose = require('mongoose')
-const { Schema } = mongoose
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const baseSchema = require('./base')
+const baseSchema = require('./base');
 
-const userSchema = baseSchema.clone()
+const userSchema = baseSchema.clone();
 
 userSchema.add({
-    email : {
-        type : String,
-        required : true,
-        unique : true
-    },
-    password : {
+    email: {
         type: String,
-        required : true
+        required: true,
+        unique: true,
     },
-    name : {
-        type : String,
-        required : true
+    password: {
+        type: String,
+        required: true,
     },
-    age : {
+    name: {
+        type: String,
+        required: true,
+    },
+    age: {
         type: Number,
-        required : true
+        required: true,
     },
-    phoneNumber : {
+    phoneNumber: {
         type: String,
         require: false,
-        unique : true
-    }
-})
+        unique: true,
+    },
+});
 
-module.exports = mongoose.model('User', userSchema)
+module.exports = mongoose.model('User', userSchema);
