@@ -83,7 +83,7 @@ jobs:
 
       - name: Create new PR if none exists
         if: env.EXISTING_PR == ''
-        uses: repo-sync/pull-request-action@v2
+        uses: repo-sync/pull-request@v2
         with:
           source_branch: '${{ steps.branch.outputs.BRANCH_NAME }}'
           destination_branch: 'main'
