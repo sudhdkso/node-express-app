@@ -103,4 +103,3 @@ jobs:
           base: main
           delete-branch: false
           draft: false
-          allow_no_diff: true
