@@ -1,61 +1,61 @@
 name: 📦 Auto PR with Commit Messages & Related Issues
 
 on:
-    push:
-        branches:
-            - 'feat/**'
+  push:
+    branches:
+      - 'feat/**'
 
 jobs:
-    create-pr:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v3
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-            - name: Set up Git
-              run: git fetch --prune --unshallow
+      - name: Set up Git
+        run: git fetch --prune --unshallow
 
-            - name: Get branch name
-              id: branch
-              run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+      - name: Get branch name
+        id: branch
+        run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
 
-            - name: Get commit messages and extract issues
-              id: extract
-              run: |
-                  COMMITS=$(git log -5 --pretty=format:"- %s" ${{ github.event.before }}..HEAD)
-                  echo "COMMITS<<EOF" >> $GITHUB_ENV
-                  echo "$COMMITS" >> $GITHUB_ENV
-                  echo "EOF" >> $GITHUB_ENV
+      - name: Get commit messages and extract issues
+        id: extract
+        run: |
+          COMMITS=$(git log -5 --pretty=format:"- %s" ${{ github.event.before }}..HEAD)
+          echo "COMMITS<<EOF" >> $GITHUB_ENV
+          echo "$COMMITS" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
-                  # Extract related issues from commit messages (e.g., #123, #456)
-                  ISSUES=$(echo "$COMMITS" | grep -oE "#[0-9]+" | sort -u | tr '\n' ',' | sed 's/,$//')
-                  if [ -z "$ISSUES" ]; then
-                    ISSUES="X"
-                  fi
-                  echo "RELATED_ISSUES=$ISSUES" >> $GITHUB_ENV
+          # Extract related issues from commit messages (e.g., #123, #456)
+          ISSUES=$(echo "$COMMITS" | grep -oE "#[0-9]+" | sort -u | tr '\n' ',' | sed 's/,$//')
+          if [ -z "$ISSUES" ]; then
+            ISSUES="X"
+          fi
+          echo "RELATED_ISSUES=$ISSUES" >> $GITHUB_ENV
 
-                  # Extract commit message content after ":"
-                  COMMIT_BODIES=$(echo "$COMMITS" | sed 's/^[^:]*: //')
-                  echo "COMMIT_BODIES<<EOF" >> $GITHUB_ENV
-                  echo "$COMMIT_BODIES" >> $GITHUB_ENV
-                  echo "EOF" >> $GITHUB_ENV
+          # Extract commit message content after ":"
+          COMMIT_BODIES=$(echo "$COMMITS" | sed 's/^[^:]*: //')
+          echo "COMMIT_BODIES<<EOF" >> $GITHUB_ENV
+          echo "$COMMIT_BODIES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
-            - name: Create PR
-              uses: repo-sync/pull-request@v2
-              with:
-                  source_branch: ${{ steps.branch.outputs.BRANCH_NAME }}
-                  destination_branch: main
-                  pr_title: 'steps.branch.outputs.BRANCH_NAME'
-                  pr_body: |
-                      ## 🔗 연관 이슈
-                      ${{ env.RELATED_ISSUES }}
+      - name: Create PR
+        uses: repo-sync/pull-request@v2
+        with:
+          source_branch: ${{ steps.branch.outputs.BRANCH_NAME }}
+          destination_branch: main
+          pr_title: '${{ steps.branch.outputs.BRANCH_NAME }}'
+          pr_body: |
+            ## 🔗 연관 이슈
+            ${{ env.RELATED_ISSUES }}
 
-                      ## 🔀 브랜치 병합
-                      ${{ steps.branch.outputs.BRANCH_NAME }} → main
+            ## 🔀 브랜치 병합
+            ${{ steps.branch.outputs.BRANCH_NAME }} → main
 
-                      ## ✅ 작업 내용
-                      ${{ env.COMMIT_BODIES }}
+            ## ✅ 작업 내용
+            ${{ env.COMMIT_BODIES }}
 
-                      ---
-                      자동 생성된 PR입니다.
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
+            ---
+            자동 생성된 PR입니다.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
