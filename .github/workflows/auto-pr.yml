@@ -25,7 +25,8 @@ jobs:
            git fetch origin
 
           # 원격 브랜치 기준으로 로그 조회
-          COMMITS=$(git log --pretty=format:"%s" origin/main..origin/feat/user-signup-recovery | sed 's/^[^:]*:[[:space:]]*//' | sed 's/^/- /')
+          COMMITS=$(git log --pretty=format:"%s" origin/main..origin/${{ steps.branch.outputs.BRANCH_NAME }} | sed 's/^[^:]*:[[:space:]]*//' | sed 's/^/- /')          
+          
           echo "COMMIT_BODIES<<EOF" >> $GITHUB_ENV
           echo "$COMMITS" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
