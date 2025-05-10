@@ -12,6 +12,7 @@ exports.createUser = async (userData) => {
         }
         const password = hashPassword(userData.password);
 
+        console.log(userData);
         const userDto = new UserDTO(
             userData.email,
             userData.name,
